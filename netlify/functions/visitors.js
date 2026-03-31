@@ -1,6 +1,6 @@
 const { getStore } = require("@netlify/blobs");
 
-const store = getStore({ name: "prank-visitors", consistency: "strong" });
+const store = getStore("prank-visitors");
 const KEY = "names";
 const MAX_NAMES = 20;
 
