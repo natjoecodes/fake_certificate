@@ -57,7 +57,7 @@
     };
 
     const fetchVisitorsFromNetlify = async () => {
-      const response = await fetch(API_URL);
+      const response = await fetch(API_URL, { cache: 'no-store' });
       if (!response.ok) throw new Error('Could not load visitors');
       const payload = await response.json();
       return Array.isArray(payload.names) ? payload.names : [];
@@ -66,6 +66,7 @@
     const postVisitorToNetlify = async (newName) => {
       const response = await fetch(API_URL, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name: newName }),
       });

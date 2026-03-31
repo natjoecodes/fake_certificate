@@ -1,6 +1,6 @@
 const { getStore } = require("@netlify/blobs");
 
-const store = getStore("prank-visitors");
+const store = getStore({ name: "prank-visitors", consistency: "strong" });
 const KEY = "names";
 const MAX_NAMES = 20;
 
@@ -34,7 +34,10 @@ const readNames = async () => {
 
 const json = (statusCode, body) => ({
   statusCode,
-  headers: { "content-type": "application/json" },
+  headers: {
+    "content-type": "application/json",
+    "cache-control": "no-store",
+  },
   body: JSON.stringify(body),
 });
 
@@ -52,7 +55,7 @@ exports.handler = async (event) => {
 
       const existing = await readNames();
       const next = dedupeAndTrim([newName, ...existing]);
-      await store.setJSON(KEY, []);
+      await store.setJSON(KEY, next);
       return json(200, { names: next });
     }
 
