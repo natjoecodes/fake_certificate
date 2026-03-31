@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Certificate Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand-link" href="https://coursera.org" aria-label="Go to destination site">
+      <img class="brand-logo" src="assets/logo.png" alt="Site logo">
+    </a>
+    <div class="icon">Menu</div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <p class="eyebrow">Course Certificate Preview</p>
+        <h1 class="title">Fundamentals of Digital Design for VLSI Chip Design</h1>
+        <p class="subtitle">
+          Generate a clean certificate preview in seconds with a product-grade experience,
+          structured details, and professional visual quality.
+        </p>
+
+        <section class="card premium-card">
+          <p class="label">Enter your name</p>
+          <form id="nameForm" class="form">
+            <input id="nameInput" type="text" placeholder="Your full name" maxlength="60" required />
+            <button type="submit">Generate Preview</button>
+          </form>
+        </section>
+
+        <div class="meta-row">
+          <span>4.8 learner satisfaction</span>
+          <span>18,000+ enrollments</span>
+          <span>Updated for 2026</span>
+        </div>
+      </div>
+
+      <aside class="preview-panel" aria-label="Certificate product preview">
+        <p class="preview-label">Preview Quality</p>
+        <p class="preview-title">Professional Certificate Layout</p>
+        <div class="preview-sheet">
+          <img
+            class="preview-image"
+            src="assets/certificate.jpg"
+            alt="Sample certificate preview"
+          >
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

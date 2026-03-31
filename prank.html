@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificate Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container reveal-wrap">
+    <p class="eyebrow">Certificate Verification</p>
+    <h1 class="title" id="headline">Loading...</h1>
+    <section class="card reveal prank-reveal">
+      <div class="prank-photo-wrap">
+        <img
+          id="prankPhoto"
+          class="prank-photo"
+          src="assets/fake.png"
+          alt="Prank reveal image"
+        >
+      </div>
+
+      <section class="visitor-list-wrap">
+        <h2 class="visitor-title">മണ്ടന്മാർ ആയവർ</h2>
+        <ul id="visitorList" class="visitor-list"></ul>
+      </section>
+
+      <a class="again" href="index.html">Try with another name</a>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'prankVisitors';
+    const API_URL = '/.netlify/functions/visitors';
+    const params = new URLSearchParams(window.location.search);
+    const name = (params.get('name') || 'Anonymous').trim();
+    const safeName = name.replace(/[<>]/g, '').slice(0, 60) || 'Anonymous';
+    const headline = document.getElementById('headline');
+    const visitorList = document.getElementById('visitorList');
+
+    headline.textContent = `അങ്ങനെ ഇപ്പൊ ചുഗിക്കണ്ട, ${safeName}.`;
+
+    const readVisitors = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const saveVisitors = (list) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    };
+
+    const fetchVisitorsFromNetlify = async () => {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Could not load visitors');
+      const payload = await response.json();
+      return Array.isArray(payload.names) ? payload.names : [];
+    };
+
+    const postVisitorToNetlify = async (newName) => {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: newName }),
+      });
+      if (!response.ok) throw new Error('Could not save visitor');
+      const payload = await response.json();
+      return Array.isArray(payload.names) ? payload.names : [];
+    };
+
+    const renderVisitors = (list) => {
+      visitorList.innerHTML = '';
+      if (!list.length) {
+        const li = document.createElement('li');
+        li.className = 'visitor-empty';
+        li.textContent = 'No names yet. Be the first one.';
+        visitorList.appendChild(li);
+        return;
+      }
+
+      list.forEach((entry) => {
+        const li = document.createElement('li');
+        li.className = 'visitor-item visitor-name';
+        li.textContent = entry;
+        visitorList.appendChild(li);
+      });
+    };
+
+    const visitors = readVisitors()
+      .filter((entry) => typeof entry === 'string')
+      .map((entry) => entry.replace(/[<>]/g, '').trim().slice(0, 60))
+      .filter(Boolean);
+
+    const shouldAddCurrent = params.has('name') && safeName;
+    const normalized = safeName.toLowerCase();
+    const withoutCurrent = visitors.filter((entry) => entry.toLowerCase() !== normalized);
+    const latestVisitors = shouldAddCurrent
+      ? [safeName, ...withoutCurrent].slice(0, 20)
+      : withoutCurrent.slice(0, 20);
+
+    const load = async () => {
+      try {
+        const sharedVisitors = shouldAddCurrent
+          ? await postVisitorToNetlify(safeName)
+          : await fetchVisitorsFromNetlify();
+        renderVisitors(sharedVisitors);
+      } catch (error) {
+        saveVisitors(latestVisitors);
+        renderVisitors(latestVisitors);
+      }
+    };
+
+    load();
+  </script>
+</body>
+</html>
