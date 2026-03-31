@@ -44,7 +44,10 @@
 
     const fetchVisitorsFromNetlify = async () => {
       const response = await fetch(API_URL, { cache: 'no-store' });
-      if (!response.ok) throw new Error('Could not load visitors');
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || payload.error || `GET failed (${response.status})`);
+      }
       const payload = await response.json();
       return Array.isArray(payload.names) ? payload.names : [];
     };
@@ -56,7 +59,10 @@
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name: newName }),
       });
-      if (!response.ok) throw new Error('Could not save visitor');
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || payload.error || `POST failed (${response.status})`);
+      }
       const payload = await response.json();
       return Array.isArray(payload.names) ? payload.names : [];
     };
@@ -90,7 +96,7 @@
         visitorList.innerHTML = '';
         const li = document.createElement('li');
         li.className = 'visitor-empty';
-        li.textContent = 'Could not load shared names. Check Netlify Function deployment.';
+        li.textContent = `Could not load shared names: ${error.message}`;
         visitorList.appendChild(li);
       }
     };

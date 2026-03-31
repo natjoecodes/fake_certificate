@@ -1,6 +1,3 @@
-const { getStore } = require("@netlify/blobs");
-
-const store = getStore("prank-visitors");
 const KEY = "names";
 const MAX_NAMES = 20;
 
@@ -26,7 +23,12 @@ const dedupeAndTrim = (names) => {
   return output;
 };
 
-const readNames = async () => {
+const getVisitorsStore = async () => {
+  const { getStore } = await import("@netlify/blobs");
+  return getStore("prank-visitors");
+};
+
+const readNames = async (store) => {
   const saved = await store.get(KEY, { type: "json" });
   if (!Array.isArray(saved)) return [];
   return dedupeAndTrim(saved);
@@ -43,8 +45,10 @@ const json = (statusCode, body) => ({
 
 exports.handler = async (event) => {
   try {
+    const store = await getVisitorsStore();
+
     if (event.httpMethod === "GET") {
-      const names = await readNames();
+      const names = await readNames(store);
       return json(200, { names });
     }
 
@@ -53,7 +57,7 @@ exports.handler = async (event) => {
       const newName = sanitizeName(parsed.name);
       if (!newName) return json(400, { error: "Name is required" });
 
-      const existing = await readNames();
+      const existing = await readNames(store);
       const next = dedupeAndTrim([newName, ...existing]);
       await store.setJSON(KEY, next);
       return json(200, { names: next });
@@ -61,6 +65,9 @@ exports.handler = async (event) => {
 
     return json(405, { error: "Method not allowed" });
   } catch (error) {
-    return json(500, { error: "Server error" });
+    return json(500, {
+      error: "Server error",
+      detail: error && error.message ? error.message : String(error),
+    });
   }
 };
